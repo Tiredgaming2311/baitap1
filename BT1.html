@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtEd 7 Pro - Studio Chuyển đổi số Mỹ thuật 7 (Kết nối tri thức)</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif']
+                    },
+                    colors: {
+                        kntt: { 50: '#fdf4ff', 100: '#fae8ff', 500: '#c026d3', 600: '#a21caf', 900: '#701a75' }, // Tông màu sáng tạo nghệ thuật
+                        surface: '#0f172a',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { background-color: #f8fafc; }
+        [x-cloak] { display: none !important; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        .glass-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
+        .text-gradient { background: linear-gradient(135deg, #c026d3, #3b82f6, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .ai-shimmer {
+            background: linear-gradient(90deg, #fdf4ff 0%, #fae8ff 50%, #fdf4ff 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        .art-shadow { box-shadow: 0 10px 30px -10px rgba(0,0,0,0.08); }
+    </style>
+</head>
+<body x-data="artPlatform7()" class="h-screen overflow-hidden flex text-slate-800 antialiased">
+
+    <aside class="w-[280px] bg-surface text-slate-300 flex flex-col transition-all z-20 relative shadow-2xl">
+        <!-- Logo -->
+        <div class="h-24 flex items-center gap-3 px-6 border-b border-slate-800 bg-slate-900/50">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-fuchsia-600 to-indigo-500 flex items-center justify-center text-white shadow-[0_0_20px_rgba(192,38,211,0.4)] relative">
+                <i data-lucide="palette" class="w-6 h-6"></i>
+                <div class="absolute -bottom-1 -right-1 bg-amber-500 text-[9px] font-black px-1.5 py-0.5 rounded-md border border-white text-white">L.7</div>
+            </div>
+            <div>
+                <h1 class="font-display font-bold text-xl text-white tracking-tight leading-none">ArtEd 7</h1>
+                <span class="text-[10px] font-bold text-fuchsia-400 uppercase tracking-widest bg-fuchsia-950 px-1.5 py-0.5 rounded mt-1 inline-block">Kết nối tri thức</span>
+            </div>
+        </div>
+
+        <!-- Menu -->
+        <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-2">Không gian làm việc</div>
+            
+            <button @click="changeTab('dashboard')" :class="activeTab === 'dashboard' ? 'bg-fuchsia-600/20 text-fuchsia-400 font-semibold' : 'hover:bg-slate-800 hover:text-white'" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Bảng điều khiển Lớp 7
+            </button>
+
+            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 mt-6 px-2">Công cụ Sư phạm</div>
+            
+            <button @click="changeTab('khbd')" :class="activeTab === 'khbd' ? 'bg-fuchsia-600/20 text-fuchsia-400 font-semibold' : 'hover:bg-slate-800 hover:text-white'" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all relative">
+                <i data-lucide="book-open-check" class="w-5 h-5"></i> Soạn KHBD (CV 5512)
+                <span class="absolute right-2 top-1/2 -translate-y-1/2 flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span></span>
+            </button>
+            
+            <button @click="changeTab('rubric')" :class="activeTab === 'rubric' ? 'bg-fuchsia-600/20 text-fuchsia-400 font-semibold' : 'hover:bg-slate-800 hover:text-white'" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all">
+                <i data-lucide="crosshair" class="w-5 h-5"></i> Rubric Đánh Giá Tranh
+            </button>
+            
+            <button @click="changeTab('gallery')" :class="activeTab === 'gallery' ? 'bg-fuchsia-600/20 text-fuchsia-400 font-semibold' : 'hover:bg-slate-800 hover:text-white'" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all">
+                <i data-lucide="image" class="w-5 h-5"></i> Trưng bày & Triển lãm Ảo
+            </button>
+
+            <!-- Khối AI Nổi bật -->
+            <div class="mt-8 mx-2 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-4 border border-fuchsia-700/30 relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 w-16 h-16 bg-fuchsia-500 rounded-full opacity-15 blur-2xl group-hover:scale-150 transition duration-700"></div>
+                <h4 class="text-sm font-bold text-white flex items-center gap-2 font-display"><i data-lucide="sparkles" class="w-4 h-4 text-fuchsia-400"></i> AI Art Assistant</h4>
+                <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">Đã học toàn bộ chương trình Mỹ thuật 7 Kết nối tri thức.</p>
+            </div>
+        </nav>
+
+        <!-- User Profile -->
+        <div class="p-4 border-t border-slate-800 bg-slate-900/50">
+            <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-800 cursor-pointer transition">
+                <div class="relative">
+                    <img src="https://ui-avatars.com/api/?name=Art+Teacher&background=c026d3&color=fff" class="w-9 h-9 rounded-full shadow-sm" alt="GV">
+                    <div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-slate-900 rounded-full"></div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-white font-display">Giáo viên Mỹ thuật</h3>
+                    <p class="text-[10px] text-slate-400">Tổ Nghệ thuật THCS</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-full bg-[#f8fafc] relative w-full overflow-hidden">
+        
+        <header class="h-16 glass-nav flex items-center justify-between px-8 z-10 sticky top-0 w-full">
+            <div class="flex items-center gap-2 text-sm font-display">
+                <span class="text-slate-400 font-medium">Mỹ thuật 7 (KNTT)</span>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>
+                <span class="font-bold text-slate-700 text-gradient" x-text="getPageTitle()"></span>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button @click="showToast('Đã đồng bộ giáo án bài 3 lên Cloud thành công!', 'success')" class="flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-fuchsia-600 to-indigo-600 text-white font-semibold text-sm shadow-md shadow-fuchsia-500/20 hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                    <i data-lucide="cloud-upload" class="w-4 h-4"></i> Đồng bộ Cloud
+                </button>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto px-8 py-6 w-full custom-scrollbar">
+            
+            <!-- TAB 1: DASHBOARD -->
+            <div x-show="activeTab === 'dashboard'" x-transition.opacity x-cloak class="max-w-6xl mx-auto space-y-6">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <h2 class="text-3xl font-display font-bold text-slate-800">Mỹ thuật 7 - Bài 3: Sáng tạo từ vật liệu tái chế</h2>
+                        <p class="text-slate-500 mt-1">Sách Kết nối tri thức với cuộc sống - Chủ đề Tạo hình không gian & Thiết kế.</p>
+                    </div>
+                    <span class="text-xs font-bold text-fuchsia-600 bg-fuchsia-50 px-3 py-1.5 rounded-lg border border-fuchsia-200">Chương trình Mới 2018</span>
+                </div>
+
+                <!-- Thống kê Card -->
+                <div class="grid grid-cols-4 gap-4">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 art-shadow">
+                        <div class="w-12 h-12 rounded-xl bg-fuchsia-50 flex items-center justify-center text-fuchsia-600"><i data-lucide="scissors" class="w-6 h-6"></i></div>
+                        <div class="mt-3"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Tiến độ Bài 3</p><h3 class="text-3xl font-display font-black text-slate-800">2 <span class="text-sm font-medium text-slate-400">/ 2 tiết</span></h3></div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 art-shadow">
+                        <div class="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600"><i data-lucide="award" class="w-6 h-6"></i></div>
+                        <div class="mt-3"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Sản phẩm 3D đã nộp</p><h3 class="text-3xl font-display font-black text-slate-800">42</h3></div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 art-shadow">
+                        <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600"><i data-lucide="video" class="w-6 h-6"></i></div>
+                        <div class="mt-3"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Video Hướng dẫn</p><h3 class="text-3xl font-display font-black text-slate-800">08</h3></div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 art-shadow">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600"><i data-lucide="check-circle" class="w-6 h-6"></i></div>
+                        <div class="mt-3"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Đạt chuẩn đánh giá</p><h3 class="text-3xl font-display font-black text-slate-800">96%</h3></div>
+                    </div>
+                </div>
+
+                <!-- Trưng bày nhanh -->
+                <div class="grid grid-cols-3 gap-6 mt-6">
+                    <div class="col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 p-6 art-shadow flex flex-col">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h3 class="font-bold font-display text-slate-800">Sản phẩm Bài 3: Mô hình sáng tạo</h3>
+                                <p class="text-xs text-slate-500">Sử dụng vỏ hộp, chai nhựa, giấy báo cũ để tạo hình đồ vật / con vật.</p>
+                            </div>
+                            <button class="text-xs text-fuchsia-600 font-semibold hover:underline">Chấm điểm</button>
+                        </div>
+                        <div class="flex-1 grid grid-cols-3 gap-4">
+                            <div class="rounded-xl bg-slate-100 overflow-hidden relative group cursor-pointer border border-slate-200 h-36">
+                                <img src="https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=500&q=80" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" alt="Art">
+                                <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                                    <p class="text-white text-xs font-bold">Mô hình Robot Tái chế</p>
+                                </div>
+                            </div>
+                            <div class="rounded-xl bg-slate-100 overflow-hidden relative group cursor-pointer border border-slate-200 h-36">
+                                <img src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=500&q=80" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" alt="Art">
+                                <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                                    <p class="text-white text-xs font-bold">Lọ hoa từ chai nhựa</p>
+                                </div>
+                            </div>
+                            <div class="rounded-xl bg-slate-50 flex items-center justify-center border-2 border-dashed border-slate-300 hover:bg-slate-100 cursor-pointer transition group h-36">
+                                <div class="text-center">
+                                    <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 mx-auto mb-2 group-hover:bg-fuchsia-100 group-hover:text-fuchsia-600 transition"><i data-lucide="plus" class="w-5 h-5"></i></div>
+                                    <p class="text-xs font-bold text-slate-500">Tải ảnh bài tập</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-span-1 bg-white rounded-2xl shadow-sm border border-slate-100 p-6 art-shadow">
+                        <h3 class="font-bold font-display text-slate-800 mb-4">Yêu cầu cần đạt (Bài 3)</h3>
+                        <ul class="space-y-3 text-sm text-slate-600">
+                            <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i> Nhận biết được vẻ đẹp và công năng của vật liệu tái chế trong mỹ thuật.</li>
+                            <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i> Thực hiện được thao tác cắt, dán, ghép nối các vật liệu để tạo hình khối 3D.</li>
+                            <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i> Nêu được cảm nhận về sản phẩm của mình và bạn bè.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: SOẠN GIÁO ÁN (AI KNTT MỸ THUẬT 7 - BÀI 3) -->
+            <div x-show="activeTab === 'khbd'" x-transition.opacity x-cloak class="max-w-4xl mx-auto space-y-6">
+                <div class="bg-gradient-to-r from-fuchsia-50 to-indigo-50 p-6 rounded-2xl border border-fuchsia-200 flex items-center justify-between shadow-sm">
+                    <div>
+                        <h3 class="text-lg font-bold font-display text-fuchsia-900 flex items-center gap-2">
+                            Trợ lý AI - Soạn Giáo Án Mỹ Thuật 7 (Bài 3)
+                            <span class="bg-fuchsia-100 text-fuchsia-700 text-[10px] px-2 py-0.5 rounded-full uppercase font-bold tracking-widest border border-fuchsia-200">CV 5512</span>
+                        </h3>
+                        <p class="text-sm text-fuchsia-700 mt-1">Cấu trúc 3 hoạt động chuyên sâu theo sách Kết nối tri thức.</p>
+                    </div>
+                    <button @click="simulateAIGeneration()" :disabled="isGenerating" class="flex items-center gap-2 bg-fuchsia-600 hover:bg-fuchsia-700 disabled:bg-fuchsia-400 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-fuchsia-200 transition-all">
+                        <i data-lucide="sparkles" class="w-5 h-5"></i> 
+                        <span x-text="isGenerating ? 'AI đang phân tích SGK Bài 3...' : 'Auto-Soạn KHBD Bài 3'"></span>
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 relative overflow-hidden art-shadow">
+                    <div class="mb-6 pb-4 border-b border-slate-100 flex gap-4 items-end">
+                        <div class="flex-1">
+                            <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Tên Bài Học (Mỹ Thuật 7 - Kết Nối Tri Thức)</label>
+                            <input type="text" value="Bài 3: Sáng tạo sản phẩm từ vật liệu tái chế (2 Tiết)" class="w-full mt-2 text-xl font-display font-bold text-slate-800 border-none outline-none focus:ring-0 p-0 text-gradient">
+                        </div>
+                        <div class="text-xs font-bold bg-slate-100 text-slate-500 px-3 py-1.5 rounded-lg border border-slate-200">Chủ đề: Tạo hình 3D</div>
+                    </div>
+
+                    <!-- Hiệu ứng AI Loading -->
+                    <div x-show="isGenerating" class="space-y-4">
+                        <div class="h-4 bg-slate-100 rounded w-3/4 ai-shimmer"></div>
+                        <div class="h-4 bg-slate-100 rounded w-full ai-shimmer"></div>
+                        <div class="h-4 bg-slate-100 rounded w-5/6 ai-shimmer"></div>
+                        <div class="h-28 bg-slate-100 rounded-xl w-full mt-6 ai-shimmer border border-slate-200"></div>
+                    </div>
+
+                    <!-- Nội dung sinh ra chuẩn Mỹ Thuật 7 KNTT Bài 3 -->
+                    <div x-show="!isGenerating && aiContentGenerated" class="space-y-8 text-slate-700 leading-relaxed" x-transition.opacity>
+                        
+                        <!-- HĐ 1 -->
+                        <div class="relative pl-12">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm shadow-sm border border-blue-200"><i data-lucide="eye" class="w-4 h-4"></i></div>
+                            <h4 class="font-bold text-lg text-blue-800 uppercase tracking-wide">HĐ 1: Quan sát - Nhận thức thẩm mỹ</h4>
+                            <div class="bg-blue-50/50 p-4 rounded-xl mt-3 border border-blue-100/50 text-sm space-y-2">
+                                <p><strong class="text-blue-900">Mục tiêu:</strong> Học sinh nhận diện được hình khối, chất liệu và tính hữu dụng của các sản phẩm làm từ vật liệu tái chế trong SGK trang 14, 15.</p>
+                                <p><strong class="text-blue-900">Tổ chức thực hiện:</strong> GV tổ chức trò chơi "Ai tinh mắt" – cho HS quan sát các mẫu vật (hộp giấy, ống hút, chai nhựa) và đoán xem có thể biến hóa thành vật dụng gì (đèn ngủ, robot, hộp đựng bút).</p>
+                            </div>
+                        </div>
+                        
+                        <!-- HĐ 2 -->
+                        <div class="relative pl-12">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-xl bg-fuchsia-100 text-fuchsia-600 flex items-center justify-center font-bold text-sm shadow-sm border border-fuchsia-200"><i data-lucide="brush" class="w-4 h-4"></i></div>
+                            <h4 class="font-bold text-lg text-fuchsia-800 uppercase tracking-wide">HĐ 2: Sáng tạo - Thực hành 3D</h4>
+                            <div class="bg-fuchsia-50/50 p-4 rounded-xl mt-3 border border-fuchsia-100/50 text-sm space-y-2">
+                                <p><strong class="text-fuchsia-900">Mục tiêu:</strong> Lựa chọn vật liệu phù hợp và thực hiện các bước cắt, ghép, dán tạo hình mô hình 3D.</p>
+                                <p><strong class="text-fuchsia-900">Tổ chức thực hiện:</strong> 
+                                - Bước 1: Lên ý tưởng phác thảo hình dáng sản phẩm.<br>
+                                - Bước 2: Chuẩn bị nguyên liệu (vệ sinh vỏ hộp, chai lọ).<br>
+                                - Bước 3: Cắt gọt, dùng băng dính/keo nến liên kết các bộ phận.<br>
+                                - Bước 4: Trang trí bề mặt bằng giấy màu hoặc vẽ màu acrylic.</p>
+                            </div>
+                        </div>
+
+                        <!-- HĐ 3 -->
+                        <div class="relative pl-12">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-sm shadow-sm border border-amber-200"><i data-lucide="message-circle" class="w-4 h-4"></i></div>
+                            <h4 class="font-bold text-lg text-amber-800 uppercase tracking-wide">HĐ 3: Phân tích - Đánh giá thẩm mỹ</h4>
+                            <div class="bg-amber-50/50 p-4 rounded-xl mt-3 border border-amber-100/50 text-sm space-y-2">
+                                <p><strong class="text-amber-900">Mục tiêu:</strong> Trưng bày sản phẩm (Góc sáng tạo xanh) và chia sẻ thông điệp bảo vệ môi trường.</p>
+                                <p><strong class="text-amber-900">Tổ chức thực hiện:</strong> HS giới thiệu mô hình của nhóm mình trước lớp: Tên sản phẩm, vật liệu sử dụng chính, công năng sử dụng và thông điệp ý nghĩa. GV cùng lớp nhận xét theo bộ Rubric.</p>
+                            </div>
+                        </div>
+
+                        <div class="h-14 bg-slate-50 rounded-xl border border-dashed border-slate-300 flex items-center justify-center mt-6 cursor-pointer hover:bg-slate-100 transition">
+                            <button class="text-slate-500 text-sm font-semibold flex items-center gap-2"><i data-lucide="download" class="w-4 h-4"></i> Xuất File Kế hoạch bài dạy Bài 3 (Word)</button>
+                        </div>
+                    </div>
+                    
+                    <div x-show="!isGenerating && !aiContentGenerated" class="text-center py-20 text-slate-400">
+                        <i data-lucide="book-open" class="w-16 h-16 mx-auto mb-4 text-slate-200"></i>
+                        <p class="font-medium text-slate-500">Khung soạn thảo Giáo án Mỹ thuật 7 - Bài 3.</p>
+                        <p class="text-sm mt-2">Nhấn nút <b>"Auto-Soạn KHBD Bài 3"</b> để AI tự động lên kịch bản chuẩn.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: RUBRIC ĐÁNH GIÁ BÀI 3 -->
+            <div x-show="activeTab === 'rubric'" x-transition.opacity x-cloak class="max-w-5xl mx-auto space-y-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 art-shadow">
+                    <div class="flex justify-between items-start mb-8 border-b border-slate-100 pb-4">
+                        <div>
+                            <h2 class="text-2xl font-display font-bold text-slate-800 border-l-4 border-fuchsia-600 pl-3">Rubric Đánh Giá Sản Phẩm Tái Chế 3D</h2>
+                            <p class="text-slate-500 mt-2 text-sm">Tiêu chí đánh giá cụ thể dành cho Bài 3 (Mỹ thuật 7 Kết nối tri thức).</p>
+                        </div>
+                        <span class="bg-emerald-50 text-emerald-700 font-bold text-xs px-3 py-1.5 rounded-lg border border-emerald-200">Thông tư 22 (Đạt / Chưa đạt)</span>
+                    </div>
+
+                    <div class="overflow-hidden rounded-xl border border-slate-200">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th class="px-4 py-3 font-bold text-slate-700 w-1/5 border-r border-slate-200">Tiêu chí đánh giá</th>
+                                    <th class="px-4 py-3 font-bold text-emerald-700 bg-emerald-50/50 border-r border-slate-200">Mức Đạt (Tốt / Khá)</th>
+                                    <th class="px-4 py-3 font-bold text-amber-700 bg-amber-50/50 border-r border-slate-200">Mức Đạt (Trung bình)</th>
+                                    <th class="px-4 py-3 font-bold text-red-700 bg-red-50/50">Chưa Đạt</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200">
+                                <tr class="hover:bg-slate-50/50 transition">
+                                    <td class="px-4 py-4 font-bold text-slate-700 border-r border-slate-200">Tính sáng tạo & Ý tưởng</td>
+                                    <td class="px-4 py-4 text-slate-600 bg-emerald-50/20 border-r border-slate-200">Biết tận dụng vật liệu linh hoạt, tạo hình độc đáo, mang tính ứng dụng cao.</td>
+                                    <td class="px-4 py-4 text-slate-600 bg-amber-50/20 border-r border-slate-200">Sản phẩm có ý tưởng nhưng hình dáng còn đơn giản, theo mẫu quen thuộc.</td>
+                                    <td class="px-4 py-4 text-slate-600 bg-red-50/20">Chưa thể hiện được ý tưởng, sản phẩm lỏng lẻo, cẩu thả.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/50 transition">
+                                    <td class="px-4 py-4 font-bold text-slate-700 border-r border-slate-200">Kỹ thuật tạo hình 3D</td>
+                                    <td class="px-4 py-4 text-slate-600 bg-emerald-50/20 border-r border-slate-200">Các mối nối chắc chắn, gọn gàng, bề mặt được xử lý sạch sẽ, thẩm mỹ.</td>
+                                    <td class="px-4 py-4 text-slate-600 bg-amber-50/20 border-r border-slate-200">Mối nối còn lộ keo, độ kết cấu sản phẩm tương đối, chưa thật sự vững chãi.</td>
+                                    <td class="px-4 py-4 text-slate-600 bg-red-50/20">Sản phẩm dễ bị rơi rách, rời rạc, không đứng vững được.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/50 transition">
+                                    <td class="px-4 py-4 font-bold text-slate-700 border-r border-slate-200">Thông điệp môi trường</td>
+                                    <td class="px-4 py-4 text-slate-600 bg-emerald-50/20 border-r border-slate-200">Nêu bật được ý nghĩa tái chế rác thải nhựa/vật liệu cũ bảo vệ môi trường.</td>
+                                    <td class="px-4 py-4 text-slate-600 bg-amber-50/20 border-r border-slate-200">Có sử dụng vật liệu tái chế nhưng chưa rõ thông điệp tuyên truyền.</td>
+                                    <td class="px-4 py-4 text-slate-600 bg-red-50/20">Không rõ nguồn gốc vật liệu, dùng vật liệu mới hoàn toàn.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: GALLERY / HỌC LIỆU BÀI 3 -->
+            <div x-show="activeTab === 'gallery'" x-transition.opacity x-cloak class="max-w-6xl mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-display font-bold text-slate-800">Thư Viện Ý Tưởng Tái Chế (Bài 3)</h2>
+                    <p class="text-sm text-slate-500">Gợi ý hình ảnh trực quan cho giáo viên trình chiếu</p>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-6">
+                    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300 art-shadow">
+                        <div class="h-44 bg-[url('https://images.unsplash.com/photo-1532996122724-e3c3fa4a0d5d?w=600&q=80')] bg-cover bg-center relative"></div>
+                        <div class="p-5">
+                            <span class="text-[10px] font-bold text-fuchsia-600 bg-fuchsia-50 px-2 py-0.5 rounded border border-fuchsia-200 uppercase">Ý tưởng 1</span>
+                            <h3 class="font-bold text-slate-800 text-lg mt-2">Đồ dùng học tập từ ống hút & hộp sữa</h3>
+                            <p class="text-sm text-slate-500 mt-1">Hướng dẫn học sinh làm hộp bút nhiều ngăn cực kỳ tiện ích.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300 art-shadow">
+                        <div class="h-44 bg-[url('https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=600&q=80')] bg-cover bg-center relative"></div>
+                        <div class="p-5">
+                            <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 uppercase">Ý tưởng 2</span>
+                            <h3 class="font-bold text-slate-800 text-lg mt-2">Đèn ngủ sáng tạo từ chai nhựa</h3>
+                            <p class="text-sm text-slate-500 mt-1">Biến các chai nước suối thành lồng đèn lung linh trang trí bàn học.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300 art-shadow">
+                        <div class="h-44 bg-[url('https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600&q=80')] bg-cover bg-center relative"></div>
+                        <div class="p-5">
+                            <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 uppercase">Ý tưởng 3</span>
+                            <h3 class="font-bold text-slate-800 text-lg mt-2">Mô hình động vật từ bìa carton</h3>
+                            <p class="text-sm text-slate-500 mt-1">Cắt ghép các tấm bìa cứng thành mô hình khủng long hoặc robot.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div x-show="toast.show" x-transition.opacity x-transition:enter.duration.300ms x-transition:leave.duration.500ms class="fixed bottom-6 right-6 z-50" x-cloak>
+        <div class="bg-slate-900 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 border border-slate-800">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500/20 text-emerald-400"><i data-lucide="check" class="w-5 h-5"></i></div>
+            <p class="font-medium text-sm" x-text="toast.message"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('artPlatform7', () => ({
+                activeTab: 'khbd', // Mặc định mở tab KHBD Bài 3
+                isGenerating: false,
+                aiContentGenerated: false,
+                toast: { show: false, message: '' },
+
+                changeTab(tab) { this.activeTab = tab; },
+
+                getPageTitle() {
+                    const titles = {
+                        'dashboard': 'Tổng quan Khối 7',
+                        'khbd': 'Soạn KHBD Bài 3 (AI KNTT)',
+                        'rubric': 'Rubric Đánh Giá Sản Phẩm 3D',
+                        'gallery': 'Thư Viện Ý Tưởng Tái Chế'
+                    };
+                    return titles[this.activeTab];
+                },
+
+                simulateAIGeneration() {
+                    this.isGenerating = true;
+                    this.aiContentGenerated = false;
+                    setTimeout(() => {
+                        this.isGenerating = false;
+                        this.aiContentGenerated = true;
+                        this.showToast('AI đã hoàn thành kế hoạch bài dạy Mỹ thuật 7 Bài 3!');
+                    }, 2000);
+                },
+
+                showToast(msg) {
+                    this.toast.message = msg;
+                    this.toast.show = true;
+                    setTimeout(() => { this.toast.show = false; }, 3000);
+                }
+            }))
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
